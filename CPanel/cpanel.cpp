@@ -22,8 +22,6 @@
 #include "geometry.h"
 #include "cpFile.h"
 #include "cpNode.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 
 
 void usage(const char * argv[])
@@ -93,8 +91,8 @@ void usage(const char * argv[])
     printf("Unsteady_Mode\n");
     printf("0\n");
     printf("/filepath/kinematicFile.bKin\n\n");
-    
-    
+
+
     printf("The number following Case variables indicates the number of different values for those variables, followed by the actual values\n\n");
     printf("Write_Influence_Coefficients option writes dense matrix to file for future use. Saves time of recomputing influence coefficients if running the geometry multiple times. For fine meshes (> 10000 panels), can take significant amount of time for I/O and file can become very large.\n\n");
     printf("\n");
@@ -112,7 +110,7 @@ int main(int argc, const char * argv[])
     // Start Timer
     time_t ts,tf;
     time(&ts);
-        
+
     // Check arguments
     if (argc != 2)
     {
@@ -120,25 +118,25 @@ int main(int argc, const char * argv[])
         usage(argv);
         exit(EXIT_FAILURE);
     }
-    
+
     // Check for file existence
     cpFile inFile(argv[1]);
-    
+
     inputParams inData(&inFile);
-    
+
     if (!inData.set())
     {
         usage(argv);
         exit(EXIT_FAILURE);
     }
-    
+
     std::cout << "Running CPanel with the following inputs...\n" << std::endl;
     inData.print(std::cout);
     std::cout << std::endl;
     geometry geom(&inData);
     caseMgr cm(&inData,&geom);
-    
-    
+
+
     time(&tf);
     std::cout << "Elapsed time for program execution : " << difftime(tf,ts) << " seconds" << std::endl;
 }
