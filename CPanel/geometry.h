@@ -254,9 +254,7 @@ class geometry
 public:
     geometry(inputParams* p)
     {
-        std::stringstream temp;
-        temp << p->geomFile->name << ".infCoeff";
-        infCoeffFile = temp.str();
+        infCoeffFile = p->inputFile->path + p->geomFile->name + ".infCoeff";
         writeCoeffFlag = p->writeCoeffFlag;
         vortPartFlag = p->vortexParticles;
         dt = p->timeStep;
