@@ -22,9 +22,6 @@
 #include <iomanip>
 #include <limits>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 bool inputParams::set()
 {
     // Set Default Parameters;
@@ -190,7 +187,7 @@ bool inputParams::set()
                 }
             }
         }
-        makeWorkingDir();
+
         return true;
     }
     else
@@ -304,37 +301,6 @@ void inputParams::printVec(Eigen::VectorXd &vec,std::ostream &stream)
     else
     {
         stream << vec(0) << " ";
-    }
-}
-
-void inputParams::makeWorkingDir()
-{
-    std::string inPath = inputFile->path;
-    inPath = inPath.substr(0,inPath.size()-1); // Remove trailing slash;
-
-    std::size_t folderStart = inPath.find_last_of("/")+1;
-    std::string inFolder = inPath.substr(folderStart,inPath.size()-folderStart);
-
-    if (inFolder != inputFile->name)
-    {
-        std::stringstream subdir;
-        subdir << inputFile->path << inputFile->name;
-        boost::filesystem::path p = subdir.str();
-        if (!boost::filesystem::exists(p))
-        {
-            boost::filesystem::create_directories(p);
-        }
-        chdir(subdir.str().c_str());
-        boost::filesystem::path oldPath = geomFile->file;
-        geomFile->changePath(boost::filesystem::current_path().string());
-        boost::filesystem::path newPath = geomFile->file;
-        boost::filesystem::rename(oldPath,newPath);
-        writeInputFile();
-        boost::filesystem::remove(inputFile->file);
-    }
-    else if (boost::filesystem::current_path() != inPath)
-    {
-        chdir(inPath.c_str());
     }
 }
 
