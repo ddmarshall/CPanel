@@ -19,6 +19,7 @@
 #define __CPanel__cpCaseVP__
 
 #include <iostream>
+#include <string>
 #include "cpCase.h"
 #include "particle.h"
 #include "vortexFil.h"
@@ -62,14 +63,14 @@ class cpCaseVP : public cpCase
     Eigen::Vector3d rungeKuttaStepper(Eigen::Vector3d POI);
     Eigen::Vector3d velocityInflFromEverything(Eigen::Vector3d POI);
     Eigen::Vector3d velocityInflFromEverything(particle* part);
-    
+
     void writeFilesVP();
-    void writeBodyDataVP(boost::filesystem::path path,const Eigen::MatrixXd &nodeMat);
-    void writeWakeDataVP(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat);
-    void writeBuffWake2Data(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat);
-    void writeFilamentData(boost::filesystem::path path);
-    void writeParticleData(boost::filesystem::path path);
-    
+    void writeBodyDataVP(const std::string & path,const Eigen::MatrixXd &nodeMat);
+    void writeWakeDataVP(const std::string & path, const Eigen::MatrixXd &nodeMat);
+    void writeBuffWake2Data(const std::string & path, const Eigen::MatrixXd &nodeMat);
+    void writeFilamentData(const std::string & path);
+    void writeParticleData(const std::string & path);
+
     void readBodyKinFile();
     void populateVolMesh();
     

@@ -17,6 +17,8 @@
 
 #include "cpCase.h"
 
+#include <boost/filesystem/operations.hpp>
+
 cpCase::~cpCase()
 {
     for (streamlines_index_type i=0; i<bStreamlines.size(); i++)
@@ -345,28 +347,28 @@ void cpCase::writeFiles()
         boost::filesystem::create_directories(subdir);
     }
     Eigen::MatrixXd nodeMat = geom->getNodePnts();
-    writeBodyData(subdir,nodeMat);
+    writeBodyData(subdir.string(),nodeMat);
     if (geom->getWakes().size() > 0)
     {
-        writeWakeData(subdir,nodeMat);
-        writeSpanwiseData(subdir);
+        writeWakeData(subdir.string(),nodeMat);
+        writeSpanwiseData(subdir.string());
     }
 
 
     if (params->volMeshFlag)
     {
-        writeVolMeshData(subdir, pts, cells);
+        writeVolMeshData(subdir.string(), pts, cells);
     }
 
 
     if (params->surfStreamFlag)
     {
-        writeBodyStreamlines(subdir);
+        writeBodyStreamlines(subdir.string());
     }
 
 }
 
-void cpCase::writeBodyData(boost::filesystem::path path,const Eigen::MatrixXd &nodeMat)
+void cpCase::writeBodyData(const std::string & path,const Eigen::MatrixXd &nodeMat)
 {
     std::vector<cellDataArray> data;
     cellDataArray mu("Doublet Strengths"),sigma("Source Strengths"),pot("Velocity Potential"),V("Velocity"),Cp("Cp"),bN("bezNormals"),x("xPosition"),y("yPosition"),z("zPostition");
@@ -411,11 +413,11 @@ void cpCase::writeBodyData(boost::filesystem::path path,const Eigen::MatrixXd &n
     body.connectivity = con;
     body.cellData = data;
 
-    std::string fname = path.string()+"/surfaceData.vtu";
+    std::string fname = path+"/surfaceData.vtu";
     VTUfile bodyFile(fname,body);
 }
 
-void cpCase::writeWakeData(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat)
+void cpCase::writeWakeData(const std::string & path, const Eigen::MatrixXd &nodeMat)
 {
     std::vector<cellDataArray> data;
     cellDataArray mu("Doublet Strengths"),pot("Velocity Potential");
@@ -437,12 +439,12 @@ void cpCase::writeWakeData(boost::filesystem::path path, const Eigen::MatrixXd &
     wake.pnts = nodeMat;
     wake.connectivity = con;
     wake.cellData = data;
-    std::string fname = path.string()+"/wakeData.vtu";
+    std::string fname = path+"/wakeData.vtu";
     VTUfile wakeFile(fname,wake);
 }
 
 
-void cpCase::writeSpanwiseData(boost::filesystem::path path)
+void cpCase::writeSpanwiseData(const std::string & path)
 {
     std::vector<wake*> wakes = geom->getWakes();
     for (wakePanels_index_type i=0; i<wakes.size(); i++)
@@ -453,7 +455,7 @@ void cpCase::writeSpanwiseData(boost::filesystem::path path)
         CCd = wakes[i]->getSpanwiseCd()/pow(PG,2);
 
         std::stringstream ss;
-        ss << path.string() << "/spanwiseData_Wake" << i+1 << ".csv";
+        ss << path << "/spanwiseData_Wake" << i+1 << ".csv";
         std::string fname = ss.str();
         std::ofstream fout;
         fout.open(fname);
@@ -469,7 +471,7 @@ void cpCase::writeSpanwiseData(boost::filesystem::path path)
     }
 }
 
-void cpCase::writeBodyStreamlines(boost::filesystem::path path)
+void cpCase::writeBodyStreamlines(const std::string & path)
 {
     piece p;
     std::vector<piece> pieces;
@@ -506,12 +508,12 @@ void cpCase::writeBodyStreamlines(boost::filesystem::path path)
         data.clear();
     }
 
-    std::string fname = path.string()+"/streamlines.vtu";
+    std::string fname = path+"/streamlines.vtu";
     VTUfile wakeFile(fname,pieces);
 }
 
 
-void cpCase::writeVolMeshData(boost::filesystem::path path, Eigen::MatrixXd &nodeMat, std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> ccells){
+void cpCase::writeVolMeshData(const std::string & path, Eigen::MatrixXd &nodeMat, std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> ccells){
     size_t nCells = ccells.size();
 
     std::vector<cellDataArray> data;
@@ -534,7 +536,7 @@ void cpCase::writeVolMeshData(boost::filesystem::path path, Eigen::MatrixXd &nod
     volMesh.pnts = nodeMat;
     volMesh.connectivity = con;
     volMesh.cellData = data;
-    std::string fname = path.string()+"/volumeMesh.vtu";
+    std::string fname = path+"/volumeMesh.vtu";
     VTUfile wakeFile(fname,volMesh);
 }
 

@@ -22,10 +22,10 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <string>
 #include <Eigen/Dense>
 #include <vector>
 #include <Eigen/IterativeLinearSolvers>
-#include <boost/filesystem/operations.hpp>
 #include "geometry.h"
 #include "VTUfile.h"
 #include "bodyStreamline.h"
@@ -88,14 +88,14 @@ protected:
     void stabilityDerivatives();
     void writeVTU(std::string filename);
     void writeFiles();
-    void writeBodyData(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat);
-    void writeWakeData(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat);
-    void writeSpanwiseData(boost::filesystem::path path);
-    void writeBodyStreamlines(boost::filesystem::path path);
-    
-    
-    
-    
+    void writeBodyData(const std::string & path, const Eigen::MatrixXd &nodeMat);
+    void writeWakeData(const std::string &, const Eigen::MatrixXd &nodeMat);
+    void writeSpanwiseData(const std::string & path);
+    void writeBodyStreamlines(const std::string & path);
+
+
+
+
     struct meshDat {
         std::vector<Eigen::Vector3d> velocity;
         std::vector<double> coef_press;
@@ -106,16 +106,16 @@ protected:
     using cells_index_type = cells_type::size_type;
     std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> cells;
     Eigen::MatrixXd pts;
-    
+
     Eigen::Vector3d velocityAtPoint(Eigen::Vector3d POI);
     void createVolMesh();
     void populateVolMesh();
-    void writeVolMeshData(boost::filesystem::path path, Eigen::MatrixXd &nodeMat, std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> cells);
-    
+    void writeVolMeshData(const std::string & path, Eigen::MatrixXd &nodeMat, std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> cells);
+
     Eigen::MatrixXd solnMat; // For unsteady sims, but needs to be in parent class for simple output
-    
-    
-    
+
+
+
 public:
     cpCase(geometry *ggeom, double V, double aalpha, double bbeta, double mmach, inputParams* inParams)
       : geom(ggeom), params(inParams), Vmag(V), mach(mmach), alpha(aalpha), beta(bbeta)

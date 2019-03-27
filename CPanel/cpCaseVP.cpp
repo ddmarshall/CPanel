@@ -15,10 +15,13 @@
  *    David D. Marshall - misc. changes
  ******************************************************************************/
 
+#include "cpCaseVP.h"
+
 #include <iostream>
 #include <iomanip>
 
-#include "cpCaseVP.h"
+#include <boost/filesystem/operations.hpp>
+
 
 void cpCaseVP::run(bool printFlag, bool surfStreamFlag, bool stabDerivFlag){
     
@@ -732,34 +735,34 @@ Eigen::Vector3d cpCaseVP::velocityInflFromEverything(particle* part){
 
 void cpCaseVP::writeFilesVP(){
     std::stringstream caseLabel;
-    caseLabel << "/V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
-    boost::filesystem::path subdir = boost::filesystem::current_path().string()+caseLabel.str();
+    caseLabel << "V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
+    boost::filesystem::path subdir = params->inputFile->path + caseLabel.str();
     if (!boost::filesystem::exists(subdir))
     {
         boost::filesystem::create_directories(subdir);
     }
     Eigen::MatrixXd nodeMat = geom->getNodePnts();
-    
-    writeBodyDataVP(subdir,nodeMat);
-    writeWakeDataVP(subdir,nodeMat);
-    writeBuffWake2Data(subdir,nodeMat);
-    writeSpanwiseData(subdir);
-    writeParticleData(subdir);
-    writeFilamentData(subdir);
-    
+
+    writeBodyDataVP(subdir.string(),nodeMat);
+    writeWakeDataVP(subdir.string(),nodeMat);
+    writeBuffWake2Data(subdir.string(),nodeMat);
+    writeSpanwiseData(subdir.string());
+    writeParticleData(subdir.string());
+    writeFilamentData(subdir.string());
+
     if (params->volMeshFlag && cells.size() > 0) //
     {
-        writeVolMeshData(subdir, pts, cells);
+        writeVolMeshData(subdir.string(), pts, cells);
     }
-    
+
     if (params->surfStreamFlag)
     {
-        writeBodyStreamlines(subdir);
+        writeBodyStreamlines(subdir.string());
     }
-    
+
 }
 
-void cpCaseVP::writeBodyDataVP(boost::filesystem::path path,const Eigen::MatrixXd &nodeMat){
+void cpCaseVP::writeBodyDataVP(const std::string & path,const Eigen::MatrixXd &nodeMat){
     std::vector<cellDataArray> data;
     cellDataArray mu("Doublet Strengths"),sigma("Source Strengths"),pot("Velocity Potential"),V("Velocity"),Cp("Cp"),bN("bezNormals");
     Eigen::Matrix<size_t, Eigen::Dynamic, Eigen::Dynamic> con(bPanels->size(),3);
@@ -792,12 +795,12 @@ void cpCaseVP::writeBodyDataVP(boost::filesystem::path path,const Eigen::MatrixX
     body.pnts = nodeMat;
     body.connectivity = con;
     body.cellData = data;
-    
-    std::string fname = path.string()+"/surfaceData-"+std::to_string(timestep)+".vtu";
+
+    std::string fname = path+"/surfaceData-"+std::to_string(timestep)+".vtu";
     VTUfile bodyFile(fname,body);
 }
 
-void cpCaseVP::writeWakeDataVP(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat){
+void cpCaseVP::writeWakeDataVP(const std::string & path, const Eigen::MatrixXd &nodeMat){
     std::vector<cellDataArray> data;
     cellDataArray mu("Doublet Strengths"),pot("Velocity Potential");
     Eigen::Matrix<size_t, Eigen::Dynamic, Eigen::Dynamic> con(wPanels->size(),(*wPanels)[0]->getVerts().size()); // Assumes wake won't mix tris and quads
@@ -810,21 +813,21 @@ void cpCaseVP::writeWakeDataVP(boost::filesystem::path path, const Eigen::Matrix
         pot.data(ii,0) = (*wPanels)[i]->getPotential();
         con.row(ii) = (*wPanels)[i]->getVerts();
     }
-    
+
     data.push_back(mu);
     data.push_back(pot);
-    
+
     piece wake;
     wake.pnts = nodeMat;
     wake.connectivity = con;
     wake.cellData = data;
-    
-    std::string fname = path.string()+"/wakeData-"+std::to_string(timestep)+".vtu";
+
+    std::string fname = path+"/wakeData-"+std::to_string(timestep)+".vtu";
     VTUfile wakeFile(fname,wake);
 }
 
 
-void cpCaseVP::writeBuffWake2Data(boost::filesystem::path path, const Eigen::MatrixXd &nodeMat){
+void cpCaseVP::writeBuffWake2Data(const std::string & path, const Eigen::MatrixXd &nodeMat){
     std::vector<cellDataArray> data;
     cellDataArray mu("Doublet Strengths"),pot("Velocity Potential");
     Eigen::Matrix<size_t, Eigen::Dynamic, Eigen::Dynamic> con;
@@ -845,11 +848,11 @@ void cpCaseVP::writeBuffWake2Data(boost::filesystem::path path, const Eigen::Mat
     wake.pnts = nodeMat;
     wake.connectivity = con;
     wake.cellData = data;
-    std::string fname = path.string()+"/bufferWake2Data-"+std::to_string(timestep)+".vtu";
+    std::string fname = path+"/bufferWake2Data-"+std::to_string(timestep)+".vtu";
     VTUfile wakeFile(fname,wake);
 }
 
-void cpCaseVP::writeFilamentData(boost::filesystem::path path){
+void cpCaseVP::writeFilamentData(const std::string & path){
     std::vector<cellDataArray> data;
     cellDataArray mu("Gamma");
     Eigen::Matrix<size_t, Eigen::Dynamic, Eigen::Dynamic> con;
@@ -882,12 +885,12 @@ void cpCaseVP::writeFilamentData(boost::filesystem::path path){
     fils.pnts = nodeMat;
     fils.connectivity = con;
     fils.cellData = data;
-    std::string fname = path.string()+"/filaments-"+std::to_string(timestep)+".vtu";
+    std::string fname = path+"/filaments-"+std::to_string(timestep)+".vtu";
     VTUfile filFile(fname,fils);
 }
 
-void cpCaseVP::writeParticleData(boost::filesystem::path path){
-    
+void cpCaseVP::writeParticleData(const std::string & path){
+
     Eigen::MatrixXd partMat(particles.size(),3);
     for (particles_index_type i=0; i<particles.size(); i++)
     {
@@ -915,8 +918,8 @@ void cpCaseVP::writeParticleData(boost::filesystem::path path){
     parts.pnts = partMat;
     parts.connectivity = con;
     parts.cellData = data;
-    
-    std::string fname = path.string()+"/particleData-"+std::to_string(timestep)+".vtu";
+
+    std::string fname = path+"/particleData-"+std::to_string(timestep)+".vtu";
     VTUfile partFile(fname,parts);
 }
 
