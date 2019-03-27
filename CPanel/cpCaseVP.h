@@ -40,13 +40,13 @@ class cpCaseVP : public cpCase
     particles_type particles;
     filaments_type filaments;
     wakePanels_type * w2panels; // Second row of buffer wake
-    
+
     Eigen::VectorXd wake2Doublets;
-    
+
     void convectBufferWake();
     void setSourceStrengthsVP();
     bool solutionConvergence();
-    
+
     bool solveMatrixEq();
     bool solveVPmatrixEq();
     bool edgeIsUsed(edge* thisEdge, std::vector<edge*> pEdges);
@@ -56,10 +56,10 @@ class cpCaseVP : public cpCase
     void stabilityDerivativesVP();
     void particleStrengthUpdate();
     void convectParticles();
-    
+
     Eigen::Vector3d Vinf(Eigen::Vector3d POI);
     Eigen::Vector3d VinfPlusVecPot(Eigen::Vector3d POI);
-    
+
     Eigen::Vector3d rungeKuttaStepper(Eigen::Vector3d POI);
     Eigen::Vector3d velocityInflFromEverything(Eigen::Vector3d POI);
     Eigen::Vector3d velocityInflFromEverything(particle* part);
@@ -73,21 +73,21 @@ class cpCaseVP : public cpCase
 
     void readBodyKinFile();
     void populateVolMesh();
-    
+
     int timestep = 1;
     double dt;
     int numSteps;
     bool accelerate;
     bool unsteady;
-    
-    
+
+
     particleOctree partOctree;
     particleFMM FMM;
     Eigen::MatrixXd bodyKin;
-        
+
     //    void moveGeometry();
-    
-    
+
+
 public:
     cpCaseVP( geometry *ggeom, double V, double aalpha, double bbeta, double mmach, inputParams* inParams )
       : cpCase( ggeom, V, aalpha, bbeta, mmach, inParams )
@@ -97,16 +97,16 @@ public:
         w2panels = geom->getBufferWake2Panels();
         dt = geom->getDt();
         PG = sqrt(1-pow(mach,2));
-        
+
         numSteps = inParams->numSteps;
         accelerate = inParams->accelerateCode;
         unsteady = inParams->unsteady;
     }
-    
-    
+
+
     void run(bool printFlag, bool surfStreamFlag, bool stabDerivFlag);
-    
-    
+
+
 };
 
 

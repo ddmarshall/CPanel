@@ -340,8 +340,8 @@ void cpCase::stabilityDerivatives()
 void cpCase::writeFiles()
 {
     std::stringstream caseLabel;
-    caseLabel << "/V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
-    boost::filesystem::path subdir = boost::filesystem::current_path().string()+caseLabel.str();
+    caseLabel << "V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
+    boost::filesystem::path subdir = params->inputFile->path + caseLabel.str();
     if (!boost::filesystem::exists(subdir))
     {
         boost::filesystem::create_directories(subdir);

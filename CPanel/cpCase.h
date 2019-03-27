@@ -40,17 +40,17 @@ class cpCase
 {
 protected:
     geometry *geom;
-    
+
     inputParams* params;
     double Vmag;
     double mach;
     double PG; // Prandtl-Glauert Correction - (1-M^2)^(1/2)
     double alpha;
     double beta;
-    
+
     Eigen::Vector3d Vinf;
     Eigen::Matrix3d transform;
-    
+
     using bodyPanels_type = std::vector<bodyPanel *>;
     using bodyPanels_index_type = bodyPanels_type::size_type;
     using wakePanels_type = std::vector<wakePanel *>;
@@ -58,7 +58,7 @@ protected:
     std::vector<bodyPanel*>* bPanels;
     std::vector<wakePanel*>* wPanels;
     Eigen::VectorXd sigmas;
-    
+
     double CL_trefftz = 0;
     double CD_trefftz = 0;
     Eigen::Vector3d Fbody;
@@ -67,18 +67,18 @@ protected:
     Eigen::VectorXd spanLoc;
     Eigen::VectorXd Cl;
     Eigen::VectorXd Cd;
-    
+
     Eigen::Vector3d dF_dAlpha;
     Eigen::Vector3d dF_dBeta;
     Eigen::Vector3d dM_dAlpha;
     Eigen::Vector3d dM_dBeta;
-    
+
     using streamlines_type = std::vector<bodyStreamline *>;
     using streamlines_index_type = streamlines_type::size_type;
 
     streamlines_type bStreamlines;
     Eigen::Vector3d windToBody(double V,double alpha,double beta);
-    
+
     Eigen::Vector3d bodyToWind(const Eigen::Vector3d &vec);
     void setSourceStrengths();
     bool solveMatrixEq();
@@ -101,7 +101,7 @@ protected:
         std::vector<double> coef_press;
         std::vector<Eigen::Vector3d> cellCenter;
     } volMeshDat;
-    
+
     using cells_type = std::vector<Eigen::VectorXi>;
     using cells_index_type = cells_type::size_type;
     std::vector<Eigen::Matrix<size_t, Eigen::Dynamic, 1>> cells;
@@ -125,11 +125,11 @@ public:
         wPanels = geom->getWakePanels();
         PG = sqrt(1-pow(mach,2));
     }
-    
+
     virtual ~cpCase();
-    
+
     void run(bool printFlag, bool surfStreamFlag, bool stabDerivFlag);
-    
+
     double getMach() {return mach;}
     double getV() {return Vmag;}
     double getAlpha() {return alpha;}
@@ -144,6 +144,6 @@ public:
     Eigen::Vector3d get_dM_dAlpha() {return dM_dAlpha;}
     Eigen::Vector3d get_dM_dBeta() {return dM_dBeta;}
     Eigen::MatrixXd get_soln_mat() {return solnMat;}
-    
+
 };
 #endif /* defined(__CPanel__runCase__) */
