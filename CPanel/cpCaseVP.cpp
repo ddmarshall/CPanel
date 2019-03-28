@@ -20,9 +20,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include <boost/filesystem/operations.hpp>
-
-
 void cpCaseVP::run(bool printFlag, bool surfStreamFlag, bool stabDerivFlag){
 
     if(unsteady){
@@ -733,31 +730,43 @@ Eigen::Vector3d cpCaseVP::velocityInflFromEverything(particle* part){
     return velOnPart;
 }
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 void cpCaseVP::writeFilesVP(){
     std::stringstream caseLabel;
     caseLabel << "V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
-    boost::filesystem::path subdir = params->inputFile->path + caseLabel.str();
-    if (!boost::filesystem::exists(subdir))
+    std::string subdir = params->inputFile->path + caseLabel.str();
+    std::cout << "subdir = " << subdir << std::endl;
+
+    // check if directory exists if doesn't then create it
+    struct stat info;
+    if( stat( subdir.c_str(), &info ) != 0 )
     {
-        boost::filesystem::create_directories(subdir);
+        int status = mkdir(subdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if (status != 0)
+        {
+          std::cout << "ERROR: Could not create directory " << subdir << std::endl;
+          exit(EXIT_FAILURE);
+        }
     }
     Eigen::MatrixXd nodeMat = geom->getNodePnts();
 
-    writeBodyDataVP(subdir.string(),nodeMat);
-    writeWakeDataVP(subdir.string(),nodeMat);
-    writeBuffWake2Data(subdir.string(),nodeMat);
-    writeSpanwiseData(subdir.string());
-    writeParticleData(subdir.string());
-    writeFilamentData(subdir.string());
+    writeBodyDataVP(subdir,nodeMat);
+    writeWakeDataVP(subdir,nodeMat);
+    writeBuffWake2Data(subdir,nodeMat);
+    writeSpanwiseData(subdir);
+    writeParticleData(subdir);
+    writeFilamentData(subdir);
 
     if (params->volMeshFlag && cells.size() > 0) //
     {
-        writeVolMeshData(subdir.string(), pts, cells);
+        writeVolMeshData(subdir, pts, cells);
     }
 
     if (params->surfStreamFlag)
     {
-        writeBodyStreamlines(subdir.string());
+        writeBodyStreamlines(subdir);
     }
 
 }

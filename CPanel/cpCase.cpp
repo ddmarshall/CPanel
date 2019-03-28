@@ -17,8 +17,6 @@
 
 #include "cpCase.h"
 
-#include <boost/filesystem/operations.hpp>
-
 cpCase::~cpCase()
 {
     for (streamlines_index_type i=0; i<bStreamlines.size(); i++)
@@ -337,33 +335,45 @@ void cpCase::stabilityDerivatives()
 
 }
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 void cpCase::writeFiles()
 {
     std::stringstream caseLabel;
     caseLabel << "V" << Vmag << "_Mach" << mach << "_alpha" << alpha << "_beta" << beta;
-    boost::filesystem::path subdir = params->inputFile->path + caseLabel.str();
-    if (!boost::filesystem::exists(subdir))
+    std::string subdir = params->inputFile->path + caseLabel.str();
+    std::cout << "subdir = " << subdir << std::endl;
+
+    // check if directory exists if doesn't then create it
+    struct stat info;
+    if( stat( subdir.c_str(), &info ) != 0 )
     {
-        boost::filesystem::create_directories(subdir);
+        int status = mkdir(subdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if (status != 0)
+        {
+          std::cout << "ERROR: Could not create directory " << subdir << std::endl;
+          exit(EXIT_FAILURE);
+        }
     }
     Eigen::MatrixXd nodeMat = geom->getNodePnts();
-    writeBodyData(subdir.string(),nodeMat);
+    writeBodyData(subdir,nodeMat);
     if (geom->getWakes().size() > 0)
     {
-        writeWakeData(subdir.string(),nodeMat);
-        writeSpanwiseData(subdir.string());
+        writeWakeData(subdir,nodeMat);
+        writeSpanwiseData(subdir);
     }
 
 
     if (params->volMeshFlag)
     {
-        writeVolMeshData(subdir.string(), pts, cells);
+        writeVolMeshData(subdir, pts, cells);
     }
 
 
     if (params->surfStreamFlag)
     {
-        writeBodyStreamlines(subdir.string());
+        writeBodyStreamlines(subdir);
     }
 
 }
