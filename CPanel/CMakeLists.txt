@@ -15,7 +15,7 @@
 
 project(CPANEL_APP)
 
-set(CPANEL_LIBRARIES_LIST boost_system boost_filesystem)
+set(CPANEL_LIBRARIES_LIST "")
 
 # add the CPanel application
 set (CPANEL_EXE cpanel)
