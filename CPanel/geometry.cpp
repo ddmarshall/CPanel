@@ -751,16 +751,12 @@ std::vector<panel*> geometry::getPanels()
     return panels;
 }
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 bool geometry::infCoeffFileExists()
 {
-    boost::filesystem::path p = infCoeffFile;
-    if (boost::filesystem::exists(p))
+    std::ifstream fid;
+    fid.open(infCoeffFile);
+    if (fid.good())
     {
-        std::ifstream fid;
-        fid.open(p.string());
         size_t nPans;
         fid >> nPans;
         fid.close();
